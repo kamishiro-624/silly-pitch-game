@@ -1,21 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Title</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="styles.css">
     <script src="script.js" defer></script>
 </head>
+
 <body>
 
-    <div class="page-title">
-        <h1 class="title-text">silly-pitch-game</h1>
+    <div class="flex-center">
+        <h1 class="title-text arial-font">silly-pitch-game</h1>
     </div>
     <div class="page-body">
-        <input id="hz-input"></input>
-        <button id="playSound">Play Sound</button>
+        <div class="flex-center">
+            <input class="hz-input arial-font" id="hz-input"></input>
+            <button class="hz-input-button responsive-btn" id="playSound">Play Sound</button>
+        </div>
+        <div id="errorMsg" class="errorMessage flex-center arial-font">error</div>
+
+        <br></br>
+        <button id="startSounds">Play Four Sounds</button>
+        <div id="playerChoices">
+        </div>
     </div>
 
 </body>
+
 </html>
