@@ -56,6 +56,21 @@ body {
 
 }
 
+.start-sounds-btn {
+    width: auto;
+    padding: 20px;
+    margin-top: 10px;
+
+    font-size: 40px;
+
+    color: var(--muted-white);
+    background-color: var(--gray);
+    
+    border-radius: 6px;
+    border: var(--dark-gray);
+    border-width: 3px;
+}
+
 .responsive-btn {
     transition: background-color 0.3s ease, transform 0.2s ease-out;
 }
@@ -65,10 +80,14 @@ body {
     transform: scale(1.05);
 }
 
-.errorMessage {
+.error-message {
     color: var(--muted-red);
-    font-size: 30px;
-    margin-top: 10px;
+    font-size: 24px;
+    margin-top: 20px;
+    position: fixed;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
 }
 
 .flash-error {
