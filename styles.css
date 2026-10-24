@@ -5,6 +5,7 @@
     --dark-gray: #1c1c1c;
     --light-gray: #696969;
     --muted-red: #444444;
+    --muted-green: #44af44db;
 }
 
 body {
@@ -90,6 +91,16 @@ body {
     text-align: center;
 }
 
+.success-message {
+    color: var(--muted-green);
+    font-size: 24px;
+    margin-top: 20px;
+    position: fixed;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
 .flash-error {
   animation: fadeOutAfterTwoSeconds 2s forwards;
 }
@@ -98,4 +109,39 @@ body {
   0% { opacity: 1; pointer-events: auto; }
   85% { opacity: 1; }
   100% { opacity: 0; pointer-events: none; }
+}
+
+.choice-btn-container > button {
+    width: auto;
+    padding: 20px;
+    margin: 10px;
+    margin-top: 30px;
+
+    font-size: 70px;
+    font-weight: bold;
+
+    color: var(--muted-white);
+    background-color: var(--gray);
+    
+    border-radius: 6px;
+    border: var(--dark-gray);
+    border-width: 3px;
+    transition: background-color 0.3s ease, transform 0.2s ease-out;
+}
+
+.choice-btn-container > button:hover {
+    background-color: var(--light-gray);
+    transform: scale(1.05);
+}
+
+.choice-btn-container > button.correct {
+    background-color: var(--muted-green);
+}
+
+.choice-btn-container > button.incorrect {
+    background-color: var(--muted-red);
+}
+
+.plr-choices {
+    display: none;
 }
