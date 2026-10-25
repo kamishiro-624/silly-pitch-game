@@ -9,6 +9,18 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+const activeOscillators = []; // for all sounds being played
+
+function stopAllOscillators() {
+    activeOscillators.forEach(osc => {
+        try {
+            osc.stop();
+            osc.disconnect();
+        } catch (e) { }
+    });
+    activeOscillators.length = 0;
+}
+
 function playTone(frequency, type = "sine", duration = 1) { // sine, square, sawtooth, triangle
     return new Promise((resolve) => {
         if (!audioCtx) {
@@ -26,9 +38,18 @@ function playTone(frequency, type = "sine", duration = 1) { // sine, square, saw
 
         oscillator.connect(audioCtx.destination);
         oscillator.start();
+
+        activeOscillators.push(oscillator);
+
         oscillator.stop(audioCtx.currentTime + duration); // duration 
 
         oscillator.onended = () => {
+            const index = activeOscillators.indexOf(oscillator);
+            if (index > -1) {
+                activeOscillators.splice(index, 1);
+            }
+
+            oscillator.disconnect();
             resolve();
         };
     });
@@ -83,7 +104,7 @@ async function playFourSounds() {
             pitchDeviation = freq - baseFrequency;
             wrongAnsFreq = freq;
         }
-        await playTone(freq, types[randInt(0,3)]);
+        await playTone(freq, types[randInt(0, 3)]);
         await sleep(1000);
     }
 }
@@ -93,6 +114,7 @@ const choiceButtons = document.getElementById("playerChoices");
 const choiceButtonContainer = document.getElementById("choiceBtnContainer");
 
 const message = document.getElementById("choiceFeedback");
+const buttons = choiceButtonContainer.children;
 
 let gotAnswer = false;
 
@@ -100,56 +122,85 @@ async function playToneIndep(freq, type = "sine", duration = 1) {
     await playTone(freq, type, duration);
 }
 
-function showChoices() {
-    let i = 0;
-    const buttons = choiceButtonContainer.children;
+async function showChoices() {
+    console.log("showing choices");
+    return new Promise((resolve) => {
+        let i = 0;
 
-    if (pitchDeviation > 0) {
-        pitchStatus = "sharp";
-    } else {
-        pitchStatus = "flat";
-    }
+        if (pitchDeviation > 0) {
+            pitchStatus = "sharp";
+        } else {
+            pitchStatus = "flat";
+        }
 
-    for (let button of buttons) {
-        i++;
-        const option = i;
-        button.addEventListener("click", () => {
-            if (gotAnswer) return;
+        for (let button of buttons) {
+            i++;
+            const option = i;
 
-            if (option === correctAnswer) {
-                button.classList.add("correct");
-                message.classList.add("success-message");
+            const freshButton = button.cloneNode(true);
+            button.parentNode.replaceChild(freshButton, button); // bug fix spammy
 
-                message.textContent = option + " was " + pitchStatus + " by " + Math.abs(pitchDeviation) + " Hz (" + Math.round(Math.abs(convertCentDiff(correctAnsFreq, wrongAnsFreq))) + " cents).";
-                gotAnswer = true;
+            freshButton.addEventListener("click", () => {
+                if (gotAnswer) return;
 
-                playToneIndep(correctAnsFreq, "sine", 3);
-                playToneIndep(wrongAnsFreq, "sine", 3);
-            } else {
-                message.classList.add("error-message");
-                button.classList.add("incorrect");
+                if (option === correctAnswer) {
+                    freshButton.classList.add("correct");
+                    message.classList.add("success-message");
 
-                button.style.transition = "none";
-                button.style.transform = "none";
-                button.disabled = true
+                    message.textContent = option + " was " + pitchStatus + " by " + Math.abs(pitchDeviation) + " Hz (" + Math.round(Math.abs(convertCentDiff(correctAnsFreq, wrongAnsFreq))) + " cents).";
+                    gotAnswer = true;
 
-                message.textContent = option + " was in tune.";
+                    playToneIndep(correctAnsFreq, "sine", 3);
+                    playToneIndep(wrongAnsFreq, "sine", 3);
 
-                playToneIndep(correctAnsFreq, "sine");
-            }
-        });
-    }
+                    resolve();
+                } else {
+                    message.classList.add("error-message");
+                    freshButton.classList.add("incorrect");
+
+                    freshButton.style.transition = "none";
+                    freshButton.style.transform = "none";
+                    freshButton.disabled = true
+
+                    message.textContent = option + " was in tune.";
+
+                    playToneIndep(correctAnsFreq, "sine");
+                }
+            });
+        }
+    });
 }
 
+let replayAction = false;
+
 startGameButton.addEventListener("click", async () => {
+    gotAnswer = false;
+
+    stopAllOscillators();
+
+    message.classList.remove("error-message", "success-message");
+    message.textContent = "";
+
+    for (let button of buttons) {
+        button.classList.remove("incorrect", "correct");
+        button.disabled = false;
+        button.style.transition = "";
+        button.style.transform = "";
+    }
+    choiceButtons.style.display = "";
+
     startGameButton.disabled = true;
     startGameButton.style.backgroundColor = "#1c1c1c"; // disable for now
     startGameButton.textContent = "Playing sounds...";
 
     await playFourSounds();
 
-    startGameButton.textContent = "Start Sounds";
+    startGameButton.textContent = "Choose an option";
 
     choiceButtons.style.display = "flex";
-    showChoices();
+    await showChoices();
+
+    startGameButton.textContent = "⟳ Replay";
+    startGameButton.style.backgroundColor = "#343434";
+    startGameButton.disabled = false;
 });
