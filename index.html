@@ -6,14 +6,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>silly-pitch-game</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="script.js" defer></script>
+    <script src="scripts\game.js" defer></script>
+    <script src="scripts\ui.js" defer></script>
 </head>
 
 <body>
-    <div class="config-popup flex-center">
+    <div class="config-popup flex-center" id="configPopup">
         <div class="config-title arial-font">
-            <div>Configuration</div>
-            <button>X</button>
+            <div>Settings</div>
+            <button class="config-close-btn responsive-btn" id="closePopupBtn">X</button>
+        </div>
+
+        <div class="flex-center config-content">
+            <div class="config-row-item">
+                <p class="input-label arial-font">Max Pitch Deviation (Hz)</p>
+                <input class="num-input" id="customPitchDev" placeholder="20" />
+            </div>
+            <div class="config-row-item">
+                <p class="input-label arial-font">Starting Note (Hz)</p>
+                <input class="num-input" id="customStartNote" placeholder="440" />
+            </div>
+            <div class="config-row-item">
+                <p class="input-label arial-font">Sound Types: </p>
+                <label class="input-label arial-font">
+                    Sine
+                    <input type="checkbox" class="sound-type-checkbox" id="sine"/>
+                </label>
+                <label class="input-label arial-font">
+                    Square
+                    <input type="checkbox" class="sound-type-checkbox" id="square"/>
+                </label>
+                <label class="input-label arial-font">
+                    Sawtooth
+                    <input type="checkbox" class="sound-type-checkbox" id="sawtooth"/>
+                </label>
+                <label class="input-label arial-font">
+                    Triangle
+                    <input type="checkbox" class="sound-type-checkbox" id="triangle"/>
+                </label>
+
+            </div>
         </div>
     </div>
 
@@ -24,14 +56,11 @@
         <div class="flex-center">
             <input class="hz-input arial-font" id="hz-input"></input>
             <button class="hz-input-button responsive-btn" id="playSound">Play Sound</button>
+            <button class="open-config-btn responsive-btn" id="configBtn">⚙ Settings</button>
         </div>
         <div id="errorMsg" class="error-message flex-center arial-font"></div>
 
         <br></br>
-        <div class="flex-center">
-            <p class="input-label arial-font">Max Pitch Deviation</p>
-            <input class="pitch-config-input">hi</input>
-        </div>
 
         <div id="game-controls" class="flex-center">
             <button id="startSounds" class="start-sounds-btn responsive-btn arial-font">Start Sounds</button>

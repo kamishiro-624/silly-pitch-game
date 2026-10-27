@@ -87,24 +87,41 @@ let pitchDeviation;
 
 let pitchStatus; // flat or sharp
 
-const types = ["sine", "square", "sawtooth", "triangle"];
+const soundTypes = ["sine", "square", "sawtooth", "triangle"];
+
+function getCheckedTypes() {
+    return soundTypes.filter(type => {
+        const checkbox = document.getElementById(type);
+        return checkbox ? checkbox.checked : false;
+    });
+}
+
+const customPitchDev = document.getElementById("customPitchDev");
+const customStartNoteInput = document.getElementById("customStartNote");
 
 async function playFourSounds() {
-    const baseFrequency = 440; // randInt(20, 20000)
+    let checkedTypes = getCheckedTypes();
     const badTone = randInt(0, 3);
+
+    let customPitchDeviation = Math.abs(parseFloat(customPitchDev.value)) || 20;
+    let customStartNote = parseInt(customStartNoteInput.value) || 440;
 
     correctAnswer = badTone + 1;
 
     for (let i = 0; i < 4; i++) {
-        let freq = baseFrequency;
-        correctAnsFreq = baseFrequency;
+        let freq = customStartNote;
+        correctAnsFreq = customStartNote;
 
         if (i === badTone) {
-            freq += randInt(-20, 20);
-            pitchDeviation = freq - baseFrequency;
+            freq += randInt(-customPitchDeviation, customPitchDeviation);
+
+            pitchDeviation = freq - customStartNote;
             wrongAnsFreq = freq;
         }
-        await playTone(freq, types[randInt(0, 3)]);
+
+        let type = checkedTypes[randInt(0, checkedTypes.length - 1)] || "sine";
+
+        await playTone(freq, type);
         await sleep(1000);
     }
 }
