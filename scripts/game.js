@@ -21,7 +21,79 @@ function stopAllOscillators() {
     activeOscillators.length = 0;
 }
 
-function playTone(frequency, type = "sine", duration = 1) { // sine, square, sawtooth, triangle
+// --- EXCLUSIVE INSTRUMENT STORAGE BANK ---
+const instrumentBank = {
+    piano: null,
+    guitar: null // add more
+};
+
+async function loadInstrumentSample(name, url) {
+    try {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        const response = await fetch(url);
+        const arrayBuffer = await response.arrayBuffer();
+        instrumentBank[name] = await audioCtx.decodeAudioData(arrayBuffer);
+        console.log(`${name} sample loaded successfully!`);
+    } catch (e) {
+        console.error(`Failed to load ${name} sample:`, e);
+    }
+}
+
+loadInstrumentSample('piano', '/assets/audio/C4.mp3');
+// loadInstrumentSample('guitar', '/assets/audio/guitar-c4.mp3'); // example more file
+
+
+// --- UNIVERSAL SAMPLED INSTRUMENT PLAY FUNCTION ---
+function playInstrument(frequency, type = "piano", duration = 1) {
+    return new Promise((resolve) => {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+
+        let soundNode;
+
+        if (type in instrumentBank) {
+            if (!instrumentBank[type]) {
+                console.warn(`${type} sample not ready yet.`);
+                resolve();
+                return;
+            }
+
+            soundNode = audioCtx.createBufferSource();
+            soundNode.buffer = instrumentBank[type];
+
+            const baseFrequency = 261.63;
+            soundNode.playbackRate.value = Number(frequency) / baseFrequency;
+        } else {
+            console.warn(`Unknown instrument type requested: "${type}".`);
+            resolve();
+            return;
+        }
+
+        soundNode.connect(audioCtx.destination);
+        soundNode.start();
+
+        activeOscillators.push(soundNode);
+        soundNode.stop(audioCtx.currentTime + duration);
+
+        soundNode.onended = () => {
+            const index = activeOscillators.indexOf(soundNode);
+            if (index > -1) {
+                activeOscillators.splice(index, 1);
+            }
+            soundNode.disconnect();
+            resolve();
+        };
+    });
+}
+
+function playTone(frequency, type = "sine", duration = 1) {
     return new Promise((resolve) => {
         if (!audioCtx) {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -87,7 +159,7 @@ let pitchDeviation;
 
 let pitchStatus; // flat or sharp
 
-const soundTypes = ["sine", "square", "sawtooth", "triangle"];
+const soundTypes = ["sine", "square", "sawtooth", "triangle", "piano"];
 
 function getCheckedTypes() {
     return soundTypes.filter(type => {
@@ -127,8 +199,15 @@ async function playFourSounds() {
 
         let type = checkedTypes[randInt(0, checkedTypes.length - 1)] || "sine";
 
-        await playTone(freq, type);
-        await sleep(1000);
+        const nativeTypes = ["sine", "square", "sawtooth", "triangle"];
+
+        if (nativeTypes.includes(type)) {
+            await playTone(freq, type);
+            await sleep(1000);
+        } else if (type === "piano") {
+            await playInstrument(freq, type, 1);
+            await sleep(1000);
+        }
     }
 }
 
