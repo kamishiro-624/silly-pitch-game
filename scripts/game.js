@@ -20,11 +20,10 @@ function stopAllOscillators() {
     });
     activeOscillators.length = 0;
 }
-
-// --- EXCLUSIVE INSTRUMENT STORAGE BANK ---
+// INSTRUMENT STORAGE
 const instrumentBank = {
     piano: null,
-    guitar: null // add more
+    flute: null // add more
 };
 
 async function loadInstrumentSample(name, url) {
@@ -41,11 +40,11 @@ async function loadInstrumentSample(name, url) {
     }
 }
 
-loadInstrumentSample('piano', '/assets/audio/C4.mp3');
-// loadInstrumentSample('guitar', '/assets/audio/guitar-c4.mp3'); // example more file
+loadInstrumentSample('piano', '/assets/audio/C4-piano.mp3');
+loadInstrumentSample('flute', '/assets/audio/C4-flute.mp3');
 
 
-// --- UNIVERSAL SAMPLED INSTRUMENT PLAY FUNCTION ---
+// not for  native
 function playInstrument(frequency, type = "piano", duration = 1) {
     return new Promise((resolve) => {
         if (!audioCtx) {
@@ -159,7 +158,7 @@ let pitchDeviation;
 
 let pitchStatus; // flat or sharp
 
-const soundTypes = ["sine", "square", "sawtooth", "triangle", "piano"];
+const soundTypes = ["sine", "square", "sawtooth", "triangle", "piano", "flute"];
 
 function getCheckedTypes() {
     return soundTypes.filter(type => {
@@ -204,7 +203,7 @@ async function playFourSounds() {
         if (nativeTypes.includes(type)) {
             await playTone(freq, type);
             await sleep(1000);
-        } else if (type === "piano") {
+        } else {
             await playInstrument(freq, type, 1);
             await sleep(1000);
         }
