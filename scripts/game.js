@@ -113,7 +113,13 @@ async function playFourSounds() {
         correctAnsFreq = customStartNote;
 
         if (i === badTone) {
-            freq += randInt(-customPitchDeviation, customPitchDeviation);
+            let change = randInt(-customPitchDeviation, customPitchDeviation);
+
+            while (change === 0) {
+                change = randInt(-customPitchDeviation, customPitchDeviation);
+            }
+
+            freq += change
 
             pitchDeviation = freq - customStartNote;
             wrongAnsFreq = freq;
